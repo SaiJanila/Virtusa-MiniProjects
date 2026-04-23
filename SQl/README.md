@@ -12,6 +12,7 @@ Sales performance
 Customer behavior  
 Product trends  
 **Database Structure**  
+
 **1. Users Table**  
 
 Stores customer details:
@@ -19,6 +20,7 @@ Stores customer details:
 u_id (Primary Key)  
 u_name  
 u_city  
+
 **2. Products Table**
 
 Stores product details:
@@ -27,6 +29,7 @@ p_id (Primary Key)
 p_name  
 p_category  
 p_price  
+
 **3. Orders Table**
 
 Stores order details:
@@ -34,6 +37,7 @@ Stores order details:
 o_id (Primary Key)  
 u_id (Foreign Key)  
 o_date  
+
 **4. OrderItems Table**
 
 Stores order item details:
@@ -41,6 +45,7 @@ Stores order item details:
 o_id (Foreign Key)  
 p_id (Foreign Key)  
 qty  
+
 **Features**  
 Track product sales and quantities  
 Identify top-selling products  
