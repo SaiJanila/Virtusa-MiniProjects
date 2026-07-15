@@ -1,89 +1,213 @@
 import csv
+from datetime import datetime
 
 try:
     import matplotlib.pyplot as plt
-    graph_ok = True
+    graph = True
 except:
-    graph_ok = False
+    graph = False
 
-file_name = "my_expenses.csv"
+FILE_NAME = "expenses.csv"
 
-# function to add new expense
-def add_data():
-    d = input("Enter date (YYYY-MM-DD): ")
-    c = input("Enter category: ")
-    a = float(input("Enter amount: "))
-    note = input("Enter note: ")
-
-    with open(file_name, "a", newline="") as f:
+# Create file if it doesn't exist
+try:
+    open(FILE_NAME, "r")
+except FileNotFoundError:
+    with open(FILE_NAME, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow([d, c, a, note])
-
-    print("Data saved")
+        writer.writerow(["Date", "Category", "Amount", "Description"])
 
 
-# function to show monthly report
-def show_report():
-    month = input("Enter month (YYYY-MM): ")
+# Add Expense
+def add_expense():
 
-    total_amt = 0
-    category_data = {}
+    date = input("Enter Date (DD-MM-YYYY): ")
 
     try:
-        with open(file_name, "r") as f:
-            reader = csv.reader(f)
+        datetime.strptime(date, "%d-%m-%Y")
+    except:
+        print("Invalid Date")
+        return
 
-            for row in reader:
-                d, c, a, note = row
+    category = input("Enter Category: ")
 
-                if d.startswith(month):
-                    a = float(a)
-                    total_amt += a
+    try:
+        amount = float(input("Enter Amount: "))
+    except:
+        print("Invalid Amount")
+        return
 
-                    if c in category_data:
-                        category_data[c] += a
-                    else:
-                        category_data[c] = a
+    description = input("Enter Description: ")
 
-        print("\nTotal spending:", total_amt)
+    with open(FILE_NAME, "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([date, category, amount, description])
 
-        print("\nCategory details:")
-        for key in category_data:
-            print(key, "->", category_data[key])
-
-        if category_data:
-            max_cat = max(category_data, key=category_data.get)
-            print("\nHighest spending:", max_cat)
-
-            if category_data[max_cat] > 2000:
-                print("You are spending more on", max_cat)
-
-            # show graph only if matplotlib exists
-            if graph_ok:
-                plt.pie(category_data.values(), labels=category_data.keys(), autopct='%1.1f%%')
-                plt.title("Expense Chart")
-                plt.show()
-            else:
-                print("(Graph not available - matplotlib not installed)")
-
-    except FileNotFoundError:
-        print("No data found. Please add expenses first.")
+    print("Expense Added Successfully")
 
 
-# main menu
+# View Expenses
+def view_expenses():
+
+    with open(FILE_NAME, "r") as f:
+
+        reader = csv.reader(f)
+
+        next(reader)
+
+        print("\n------ Expenses ------")
+
+        for row in reader:
+
+            print("Date :", row[0])
+            print("Category :", row[1])
+            print("Amount :", row[2])
+            print("Description :", row[3])
+            print("------------------------")
+
+
+# Monthly Summary
+def monthly_summary():
+
+    month = input("Enter Month (MM-YYYY): ")
+
+    total = 0
+
+    with open(FILE_NAME, "r") as f:
+
+        reader = csv.reader(f)
+
+        next(reader)
+
+        for row in reader:
+
+            if datetime.strptime(row[0], "%d-%m-%Y").strftime("%m-%Y") == month:
+
+                total += float(row[2])
+
+    print("\nTotal Expense :", total)
+# Category Summary
+def category_summary():
+
+    categories = {}
+
+    with open(FILE_NAME, "r") as f:
+
+        reader = csv.reader(f)
+
+        next(reader)
+
+        for row in reader:
+
+            categories[row[1]] = categories.get(row[1], 0) + float(row[2])
+
+    print("\nCategory Summary")
+
+    for c in categories:
+        print(c, ":", categories[c])
+
+
+# Highest Spending Category
+def highest_category():
+
+    categories = {}
+
+    with open(FILE_NAME, "r") as f:
+
+        reader = csv.reader(f)
+
+        next(reader)
+
+        for row in reader:
+
+            categories[row[1]] = categories.get(row[1], 0) + float(row[2])
+
+    if categories:
+
+        highest = max(categories, key=categories.get)
+
+        print("\nHighest Spending Category :", highest)
+        print("Amount :", categories[highest])
+
+
+# Spending Suggestion
+def spending_suggestion():
+
+    categories = {}
+
+    with open(FILE_NAME, "r") as f:
+
+        reader = csv.reader(f)
+
+        next(reader)
+
+        for row in reader:
+
+            categories[row[1]] = categories.get(row[1], 0) + float(row[2])
+
+    if categories:
+
+        highest = max(categories, key=categories.get)
+
+        print("\nSuggestion")
+
+        if highest.lower() == "food":
+            print("Reduce outside food expenses.")
+
+        elif highest.lower() == "travel":
+            print("Use public transport.")
+
+        elif highest.lower() == "shopping":
+            print("Avoid unnecessary shopping.")
+
+        else:
+            print("Plan your monthly budget.")
+
+        if graph:
+
+            plt.pie(categories.values(),
+                    labels=categories.keys(),
+                    autopct="%1.1f%%")
+
+            plt.title("Expense Distribution")
+            plt.show()
+
+
+# Main Menu
 while True:
-    print("\n1. Add Expense")
-    print("2. Monthly Report")
-    print("3. Exit")
 
-    ch = input("Enter choice: ")
+    print("\n===== SMART EXPENSE TRACKER =====")
+    print("1. Add Expense")
+    print("2. View Expenses")
+    print("3. Monthly Summary")
+    print("4. Category Summary")
+    print("5. Highest Spending Category")
+    print("6. Spending Suggestion")
+    print("7. Exit")
 
-    if ch == "1":
-        add_data()
-    elif ch == "2":
-        show_report()
-    elif ch == "3":
-        print("Program closed")
+    choice = input("Enter Choice: ")
+
+    if choice == "1":
+        add_expense()
+
+    elif choice == "2":
+        view_expenses()
+
+    elif choice == "3":
+        monthly_summary()
+
+    elif choice == "4":
+        category_summary()
+
+    elif choice == "5":
+        highest_category()
+
+    elif choice == "6":
+        spending_suggestion()
+
+    elif choice == "7":
+        print("Thank You")
         break
+
     else:
-        print("Invalid choice")
+        print("Invalid Choice")
